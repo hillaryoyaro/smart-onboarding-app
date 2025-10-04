@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*$py.class
+
+# Virtual Environments
+venv/
+.env/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django
+*.log
+*.pot
+*.pyc
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+statics/uploads/
+
+# Environment variables and secrets
+.env
+*.env
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# pytest cache
+.pytest_cache/
+
+# Celery and Redis
+celerybeat-schedule
+celerybeat.pid
+
+# Coverage and testing
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# Migrations cache
+*/migrations/__pycache__/
+*/migrations/*.pyc
+
+# Node (if using Next.js frontend in same repo)
+node_modules/
+next-env.d.ts
+.next/
+out/
+
