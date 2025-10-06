@@ -54,6 +54,23 @@ npm install
 # or
 yarn install
 
+## 🔧 Environment Variables
+Create a .env.local file in the root of the frontend folder and configure as below:
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+NEXTAUTH_SECRET=your_secret_key
+NEXTAUTH_URL=http://localhost:3000
+
+## 💻 Running Locally
+Start the development server:
+npm run dev
+
+## 🐳 Running with Docker (Production Mode)
+
+Build and run the frontend container
+docker build -t smart-onboarding-frontend .
+docker run -d -p 3000:3000 --env-file .env.local smart-onboarding-frontend
+
+
 ## 🗂️ Folder Structure
 frontend/
 ├── app/                   # Next.js App Router pages & layouts
@@ -66,3 +83,31 @@ frontend/
 ├── .env.local.example     # Example environment variables
 ├── package.json
 └── next.config.js
+
+## 🔗 Connecting Frontend to Backend
+
+Ensure your backend (Django) is running at http://localhost:8000.
+
+In frontend/.env.local, confirm:
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+
+You can verify connection by checking API calls in your browser’s network tab or console output in your terminal when running the frontend.
+
+## 🌍 Deployment (Vercel or Docker)
+➤ Deploy on Vercel
+
+Push your frontend folder to GitHub.
+
+Import your repo in Vercel
+.
+
+Add environment variables from .env.local.
+
+Deploy — Vercel automatically builds and runs your Next.js app.
+
+## ➤ Deploy with Docker Compose
+
+You can combine both backend and frontend into one stack:
+docker-compose up --build
+
+Ensure your docker-compose.yml defines both services (backend & frontend) and connects them through a shared network.
