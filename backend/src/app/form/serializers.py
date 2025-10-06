@@ -1,18 +1,19 @@
 from rest_framework import serializers
-from .models import Form, Submission, FileUpload
+from .models import Form, Submission, SubmissionFile
 
 class FormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form
-        fields = "__all__"
+        fields = ["id", "name", "slug", "schema", "created_at"]
 
-class FileUploadSerializer(serializers.ModelSerializer):
+class SubmissionFileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FileUpload
-        fields = ["id","field_key","file","uploaded_at"]
+        model = SubmissionFile
+        fields = ["id", "field_name", "file", "uploaded_at"]
 
 class SubmissionSerializer(serializers.ModelSerializer):
-    files = FileUploadSerializer(many=True, read_only=True)
+    files = SubmissionFileSerializer(many=True, read_only=True)
     class Meta:
         model = Submission
-        fields = ["id","form","data","metadata","created_at","processed","files"]
+        fields = ["id", "form", "data", "files", "created_at"]
+        read_only_fields = ["id", "created_at", "files"]

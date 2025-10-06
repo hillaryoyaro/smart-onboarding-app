@@ -1,7 +1,8 @@
-from django.urls import path
-from .views import FormListCreateView, FormSubmissionView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import FormViewSet
 
-urlpatterns = [
-    path("", FormListCreateView.as_view(), name="forms"),
-    path("submit/", FormSubmissionView.as_view(), name="form-submit"),
-]
+router = DefaultRouter()
+router.register(r"forms", FormViewSet, basename="form")
+
+urlpatterns = [path("", include(router.urls))]

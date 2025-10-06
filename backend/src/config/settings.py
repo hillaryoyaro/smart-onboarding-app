@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY & ENV
 # ==========================
 SECRET_KEY = config("DJANGO_SECRET_KEY", default="unsafe-secret-key")
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = config("DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
 
 # ==========================
@@ -25,13 +25,13 @@ INSTALLED_APPS = [
 
     # Third-party
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
-    "django_ninja",
-    "django_ninja_jwt",
 
     # Local apps
-    "apps.forms",
-    "apps.users",
+    "app.form",
+    "app.notifications",
+    "app.users",
 ]
 
 # ==========================
@@ -74,9 +74,9 @@ ASGI_APPLICATION = "config.asgi.application"
 # ==========================
 DATABASES = {
     "default": dj_database_url.config(
-        default=config("DATABASE_URL", default="postgres://postgres:postgres@db:5432/onboarding"),
+        default=config("DATABASE_URL", default="sqlite:///db.sqlite3"),
         conn_max_age=600,
-        ssl_require=False
+        ssl_require=False,
     )
 }
 
@@ -85,11 +85,17 @@ DATABASES = {
 # ==========================
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "django_ninja_jwt.authentication.JWTAuth",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 # ==========================
@@ -101,8 +107,8 @@ CORS_ALLOW_CREDENTIALS = True
 # ==========================
 # CELERY
 # ==========================
-CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://redis:6379/0")
-CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="redis://redis:6379/0")
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -115,10 +121,10 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "static/uploads"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # ==========================
-# PASSWORDS
+# PASSWORD VALIDATORS
 # ==========================
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -126,3 +132,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# ==========================
+# DEFAULT EMAILS
+# ==========================
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="dev@example.com")
+ADMIN_EMAIL = config("ADMIN_EMAIL", default="admin@example.com")
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
