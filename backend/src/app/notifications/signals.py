@@ -1,10 +1,9 @@
-# backend/forms/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Submission
-from .tasks import notify_admin
+from app.forms.models import Submission
+from app.forms.tasks import notify_admin_of_submission
 
 @receiver(post_save, sender=Submission)
-def trigger_notification(sender, instance, created, **kwargs):
+def trigger_submission_notification(sender, instance, created, **kwargs):
     if created:
-        notify_admin.delay(instance.form.created_by.email, instance.id)
+        notify_admin_of_submission.delay(instance.id)

@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "corsheaders",
 
     # Local apps
-    "app.form",
+    "app.forms",
     "app.notifications",
     "app.users",
 ]
@@ -136,6 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # ==========================
 # DEFAULT EMAILS
 # ==========================
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="dev@example.com")
-ADMIN_EMAIL = config("ADMIN_EMAIL", default="admin@example.com")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@smartonboarding.com")
+ADMIN_EMAIL = config("ADMIN_EMAIL", default="noreply@smartonboarding.com")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
