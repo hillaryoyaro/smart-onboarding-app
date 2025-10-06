@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Next.js build output
+.next/
+out/
+dist/
+.next/cache/
+.next/static/
+
+# Local environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor & OS Files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+*.lcov
+
+# TypeScript
+*.tsbuildinfo
+
+# Build artifacts
+*.gz
+*.zip
+*.tgz
+
+# Temporary
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Vercel
+.vercel/
+
+# Docker
+docker-compose.override.yml
+
+# Local test reports
+playwright-report/
+test-results/
+
+# Next.js telemetry
+.next/trace
+.next/analyze
+
+# Build cache
+.cache/
+eslintcache
+
+# Optional: ignore uploads or static assets if generated dynamically
+public/uploads/
+
