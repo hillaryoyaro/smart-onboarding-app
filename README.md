@@ -47,9 +47,7 @@ Admins are notified asynchronously when new submissions arrive using **Celery + 
 
 ---
 
-## 📂 Project Structure
 
-onboarding-platform/
 │
 ├── backend/ (Django)
 │ ├── src/
