@@ -48,30 +48,6 @@ Admins are notified asynchronously when new submissions arrive using **Celery + 
 ---
 
 
-│
-├── backend/ (Django)
-│ ├── src/
-│ │ ├── app/
-│ │ │ ├── forms/ # Dynamic form builder app
-│ │ │ ├── notifications/ # Celery tasks & signals
-│ │ │ └── users/ # User management
-│ │ ├── config/ # Django & Celery config
-│ │ ├── manage.py
-│ │ └── db.sqlite3
-│ └── Dockerfile
-│
-└── frontend/ (Next.js)
-├── app/
-│ ├── dashboard/forms/create/ # Admin form builder
-│ ├── forms/[id]/ # Dynamic user form renderer
-│ ├── onboarding/ # Landing/onboarding flow
-│ └── api/proxy/ # API proxy to backend
-├── components/
-│ ├── forms/ # FormFieldBuilder, DynamicFormRenderer
-│ ├── ui/ # Tailwind + shadcn UI components
-├── lib/api.ts # Backend API calls
-├── next.config.js
-└── Dockerfile
 
 ## Design Justification
 
