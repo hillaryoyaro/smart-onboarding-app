@@ -1,33 +1,24 @@
-"use client";
-import { useEffect, useState } from "react";
-import ApiProxy from "../../lib/api";
-
-
 export default function DashboardPage() {
-  const [submissions, setSubmissions] = useState([]);
-
-  useEffect(() => {
-    async function load() {
-      const { data, status } = await ApiProxy.get("/submissions/", true);
-      if (status === 200) setSubmissions(data.results || data);
-    }
-    load();
-  }, []);
-
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-4">Dashboard — Submissions</h2>
-      {submissions.length === 0 ? <p>No submissions yet.</p> : (
-        <ul className="space-y-3">
-          {submissions.map((s) => (
-            <li key={s.id} className="border p-3 rounded">
-              <div><strong>Form:</strong> {s.form}</div>
-              <div><strong>Data:</strong> <pre>{JSON.stringify(s.data, null, 2)}</pre></div>
-              <div><strong>Created:</strong> {s.created_at}</div>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
+      <p className="text-gray-600">
+        Manage forms, view submissions, and share onboarding links with clients.
+      </p>
+      <div className="mt-6 flex gap-4">
+        <a
+          href="/dashboard/forms"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Manage Forms
+        </a>
+        <a
+          href="/dashboard/submissions"
+          className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          View Submissions
+        </a>
+      </div>
     </div>
   );
 }

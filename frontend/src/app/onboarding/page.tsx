@@ -1,11 +1,31 @@
+// /app/onboarding/page.tsx
+"use client";
 
-import OnboardingForm from "../../components/forms/OnboardingForm";
+import DynamicFormRenderer from "@/components/forms/DynamicFormRenderer";
 
-export default function Page() {
+const mockForm = {
+  name: "Employee Onboarding",
+  description: "Please fill in your personal details.",
+  schema: {
+    fields: [
+      { name: "full_name", label: "Full Name", type: "text", required: true },
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "age", label: "Age", type: "number" },
+      {
+        name: "department",
+        label: "Department",
+        type: "dropdown",
+        options: ["Engineering", "Finance", "HR"],
+      },
+      { name: "resume", label: "Upload Resume", type: "file" },
+    ],
+  },
+};
+
+export default function OnboardingPage() {
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-4">Onboarding Form</h2>
-      <OnboardingForm slug="loanapp" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+      <DynamicFormRenderer formData={mockForm} />
     </div>
   );
 }
