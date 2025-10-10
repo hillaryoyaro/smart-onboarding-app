@@ -69,8 +69,8 @@ docker run -d -p 6379:6379 redis
 
 2️⃣ Run Django Server
 cd src
-python manage.py migrate
-python manage.py runserver
+python3 manage.py migrate
+python3 manage.py runserver
 Server runs at 👉 http://localhost:8000
 
 3️⃣ Run Celery Worker
