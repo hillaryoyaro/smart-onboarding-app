@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
-from app.forms.models import Submission  # ✅ FIXED: correct import path
+from app.forms.models import Submission
 
 @shared_task
 def notify_admin_of_submission(submission_id):
