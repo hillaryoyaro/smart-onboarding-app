@@ -1,209 +1,143 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { DJANGO_API_ENDPOINT } from "@/config/defaults";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-
-interface DynamicFormRendererProps {
-  slug?: string; // Fetch form from backend if provided
-  formData?: FormSchema; // Render from static data if provided
-}
-
-interface FormSchemaField {
-  name: string;
-  label: string;
-  type: string;
-  required?: boolean;
-  multiple?: boolean;
-  options?: string[];
-}
-
-interface FormSchema {
-  name: string;
-  description?: string;
-  schema?: {
-    fields?: FormSchemaField[];
-  };
-}
+import { DJANGO_API_ENDPOINT } from "@/config/defaults";
 
 export default function DynamicFormRenderer({
+  formConfig,
   slug,
-  formData,
-}: DynamicFormRendererProps) {
-  const [form, setForm] = useState<FormSchema | null>(formData || null);
-  const [loading, setLoading] = useState(!formData);
+}: {
+  formConfig: any;
+  slug: string;
+}) {
   const router = useRouter();
 
-  useEffect(() => {
-    // Skip fetch if formData is passed
-    if (!slug || formData) return;
+  // ✅ Guard: Ensure formConfig exists
+  if (!formConfig) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-red-500">Form not found 😢</p>
+      </div>
+    );
+  }
 
-    async function fetchForm() {
-      try {
-        const res = await fetch(`${DJANGO_API_ENDPOINT}/forms/${slug}/`);
-        if (!res.ok) throw new Error(`Failed to fetch form: ${res.status}`);
-        const data = await res.json();
-        setForm(data);
-      } catch (error) {
-        console.error("Error fetching form:", error);
-        setForm(null);
-      } finally {
-        setLoading(false);
-      }
+  // ✅ Safely extract schema and fields
+  const schema = formConfig.schema || {};
+  const fields = schema.fields || [];
+
+  // ✅ Handle empty fields
+  if (fields.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-500">No fields found for this form 😕</p>
+      </div>
+    );
+  }
+
+  // ✅ Dynamically generate Zod schema
+  const fieldSchema = fields.reduce((acc: any, field: any) => {
+    if (field.required) {
+      acc[field.name] = z.string().min(1, `${field.label} is required`);
+    } else {
+      acc[field.name] = z.string().optional();
     }
+    return acc;
+  }, {});
 
-    fetchForm();
-  }, [slug, formData]);
+  const FormSchema = z.object(fieldSchema);
 
-  if (loading) return <p className="text-center mt-10">Loading form...</p>;
-  if (!form) return <p className="text-center mt-10 text-red-600">Form not found.</p>;
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(FormSchema),
+  });
 
-  // 🧩 Handle form submission
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const target = e.target as HTMLFormElement;
-    const formDataObj = new FormData(target);
-
-    const payloadObj: Record<string, any> = {};
-    const fd = new FormData();
-
-    // Extract fields (non-files)
-    formDataObj.forEach((v, k) => {
-      const element = target.elements.namedItem(k) as HTMLInputElement | null;
-      if (element && element.type === "file") return;
-      if (payloadObj[k] === undefined) payloadObj[k] = v;
-      else {
-        if (!Array.isArray(payloadObj[k])) payloadObj[k] = [payloadObj[k]];
-        payloadObj[k].push(v);
-      }
-    });
-
-    // Add JSON payload
-    fd.append("payload", JSON.stringify(payloadObj));
-
-    // Append file fields
-    const fileInputs = target.querySelectorAll('input[type="file"]');
-    fileInputs.forEach((inpEl) => {
-      const inp = inpEl as HTMLInputElement;
-      const name = inp.name;
-      const files = inp.files;
-      if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          fd.append(name, files[i]);
-        }
-      }
-    });
-
+  // ✅ Handle form submission
+  const onSubmit = async (data: any) => {
     try {
-      const res = await fetch(`${DJANGO_API_ENDPOINT}/forms/${slug}/submit/`, {
+      const response = await fetch(`${DJANGO_API_ENDPOINT}/forms/${slug}/submit/`, {
         method: "POST",
-        body: fd,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
 
-      if (res.ok) {
+      if (response.ok) {
+        alert("✅ Form submitted successfully!");
+        reset();
         router.push("/onboarding/success");
       } else {
+        console.error(await response.text());
+        alert("⚠️ Submission failed. Please try again.");
         router.push("/onboarding/error");
       }
     } catch (error) {
       console.error("Submission error:", error);
       router.push("/onboarding/error");
     }
-  }
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-semibold mb-2 text-gray-800">{form.name}</h2>
-      {form.description && (
-        <p className="mb-4 text-gray-500">{form.description}</p>
-      )}
+    <div className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-2xl mt-10">
+      <h2 className="text-2xl font-semibold mb-2">{schema.title || formConfig.name}</h2>
+      <p className="text-gray-600 mb-6">{schema.description || "Please fill in the form below."}</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {form.schema?.fields?.map((f, idx) => {
-          if (!f) return null;
-          const key = f.name || `field_${idx}`;
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {fields.map((field: any) => (
+          <div key={field.name}>
+            <Label htmlFor={field.name}>{field.label}</Label>
 
-          switch (f.type) {
-            case "file":
-              return (
-                <div key={key}>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {f.label}
-                  </label>
-                  <input
-                    name={key}
-                    type="file"
-                    multiple={!!f.multiple}
-                    className="block w-full border border-gray-300 rounded-md p-2"
-                  />
-                </div>
-              );
+            {field.type === "textarea" ? (
+              <Textarea
+                {...register(field.name)}
+                placeholder={field.placeholder}
+              />
+            ) : field.type === "select" ? (
+              <select
+                {...register(field.name)}
+                className="w-full border rounded-md p-2"
+              >
+                <option value="">Select...</option>
+                {field.options?.map((option: string) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <Input
+                type={field.type}
+                placeholder={field.placeholder}
+                {...register(field.name)}
+              />
+            )}
 
-            case "dropdown":
-              return (
-                <div key={key}>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {f.label}
-                  </label>
-                  <select
-                    name={key}
-                    defaultValue=""
-                    className="border border-gray-300 rounded-md px-2 py-1 w-full"
-                  >
-                    <option value="" disabled>
-                      Choose...
-                    </option>
-                    {(f.options || []).map((opt, i) => (
-                      <option key={i} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              );
+            {errors[field.name] && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors[field.name]?.message?.toString()}
+              </p>
+            )}
+          </div>
+        ))}
 
-            case "checkbox":
-              return (
-                <div key={key} className="flex items-center space-x-2">
-                  <input
-                    name={key}
-                    type="checkbox"
-                    value="true"
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <label className="text-gray-700">{f.label}</label>
-                </div>
-              );
-
-            default:
-              return (
-                <div key={key}>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {f.label}
-                  </label>
-                  <input
-                    name={key}
-                    required={!!f.required}
-                    type={
-                      f.type === "number"
-                        ? "number"
-                        : f.type === "email"
-                        ? "email"
-                        : "text"
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1 w-full"
-                  />
-                </div>
-              );
-          }
-        })}
-
-        <button
+        <Button
           type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          className="w-full mt-4"
+          disabled={isSubmitting}
         >
-          Submit
-        </button>
+          {isSubmitting ? "Submitting..." : "Submit"}
+        </Button>
       </form>
     </div>
   );

@@ -27,6 +27,6 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/components/forms/DynamicFormRenderer.jsx", "src/app/onboarding/page.jsx", "src/components/ui/button.jsx"  ],
   "exclude": ["node_modules"]
 }

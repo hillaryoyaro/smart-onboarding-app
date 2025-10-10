@@ -1,31 +1,40 @@
-// /app/onboarding/page.tsx
 "use client";
 
+import { useEffect, useState } from "react";
+import { DJANGO_API_ENDPOINT } from "@/config/defaults";
 import DynamicFormRenderer from "@/components/forms/DynamicFormRenderer";
 
-const mockForm = {
-  name: "Employee Onboarding",
-  description: "Please fill in your personal details.",
-  schema: {
-    fields: [
-      { name: "full_name", label: "Full Name", type: "text", required: true },
-      { name: "email", label: "Email", type: "email", required: true },
-      { name: "age", label: "Age", type: "number" },
-      {
-        name: "department",
-        label: "Department",
-        type: "dropdown",
-        options: ["Engineering", "Finance", "HR"],
-      },
-      { name: "resume", label: "Upload Resume", type: "file" },
-    ],
-  },
-};
-
 export default function OnboardingPage() {
+  const [formConfig, setFormConfig] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const slug = "onboarding";
+
+  useEffect(() => {
+    const fetchForm = async () => {
+      try {
+        const response = await fetch(`${DJANGO_API_ENDPOINT}/forms/${slug}/`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch form");
+        }
+        const data = await response.json();
+        setFormConfig(data);
+      } catch (error) {
+        console.error("Error fetching form:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchForm();
+  }, []);
+
+  if (loading) {
+    return <p className="text-center mt-10 text-gray-500">Loading form...</p>;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <DynamicFormRenderer formData={mockForm} />
+    <div className="container mx-auto">
+      <DynamicFormRenderer formConfig={formConfig} slug={slug} />
     </div>
   );
 }
