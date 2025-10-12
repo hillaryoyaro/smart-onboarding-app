@@ -8,16 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { DJANGO_API_ENDPOINT } from "@/config/defaults";
 
-export default function DynamicFormRenderer({
-  formConfig,
-  slug,
-}: {
+interface DynamicFormRendererProps {
   formConfig: any;
   slug: string;
-}) {
+}
+
+export default function DynamicFormRenderer({ formConfig, slug }: DynamicFormRendererProps) {
   const router = useRouter();
+  const [fileInputs, setFileInputs] = useState<Record<string, FileList>>({});
 
   // ✅ Guard: Ensure formConfig exists
   if (!formConfig) {
@@ -28,11 +29,9 @@ export default function DynamicFormRenderer({
     );
   }
 
-  // ✅ Safely extract schema and fields
   const schema = formConfig.schema || {};
   const fields = schema.fields || [];
 
-  // ✅ Handle empty fields
   if (fields.length === 0) {
     return (
       <div className="text-center py-10">
@@ -41,13 +40,11 @@ export default function DynamicFormRenderer({
     );
   }
 
-  // ✅ Dynamically generate Zod schema
+  // ✅ Dynamically generate Zod schema (non-file fields only)
   const fieldSchema = fields.reduce((acc: any, field: any) => {
-    if (field.required) {
-      acc[field.name] = z.string().min(1, `${field.label} is required`);
-    } else {
-      acc[field.name] = z.string().optional();
-    }
+    if (field.type === "file") return acc; // files handled separately
+    if (field.required) acc[field.name] = z.string().min(1, `${field.label} is required`);
+    else acc[field.name] = z.string().optional();
     return acc;
   }, {});
 
@@ -62,20 +59,31 @@ export default function DynamicFormRenderer({
     resolver: zodResolver(FormSchema),
   });
 
+  // ✅ Handle file input changes
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFileInputs((prev) => ({ ...prev, [e.target.name]: e.target.files! }));
+    }
+  };
+
   // ✅ Handle form submission
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (values: Record<string, any>) => {
+    const formData = new FormData();
+    formData.append("payload", JSON.stringify(values));
+
+    Object.entries(fileInputs).forEach(([key, files]) => {
+      Array.from(files).forEach((file) => formData.append(key, file));
+    });
+
     try {
       const response = await fetch(`${DJANGO_API_ENDPOINT}/forms/${slug}/submit/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        body: formData,
       });
 
       if (response.ok) {
-        alert("✅ Form submitted successfully!");
         reset();
+        alert("✅ Form submitted successfully!");
         router.push("/onboarding/success");
       } else {
         console.error(await response.text());
@@ -99,15 +107,9 @@ export default function DynamicFormRenderer({
             <Label htmlFor={field.name}>{field.label}</Label>
 
             {field.type === "textarea" ? (
-              <Textarea
-                {...register(field.name)}
-                placeholder={field.placeholder}
-              />
+              <Textarea {...register(field.name)} placeholder={field.placeholder} />
             ) : field.type === "select" ? (
-              <select
-                {...register(field.name)}
-                className="w-full border rounded-md p-2"
-              >
+              <select {...register(field.name)} className="w-full border rounded-md p-2">
                 <option value="">Select...</option>
                 {field.options?.map((option: string) => (
                   <option key={option} value={option}>
@@ -115,6 +117,14 @@ export default function DynamicFormRenderer({
                   </option>
                 ))}
               </select>
+            ) : field.type === "file" ? (
+              <Input
+                type="file"
+                name={field.name}
+                onChange={handleFileChange}
+                className="w-full"
+                multiple={field.multiple || false}
+              />
             ) : (
               <Input
                 type={field.type}
@@ -131,11 +141,7 @@ export default function DynamicFormRenderer({
           </div>
         ))}
 
-        <Button
-          type="submit"
-          className="w-full mt-4"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </form>
