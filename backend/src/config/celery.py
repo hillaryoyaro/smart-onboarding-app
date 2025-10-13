@@ -5,7 +5,7 @@ from celery import Celery
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 # Create the Celery app
-app = Celery("smart_onboarding")
+app = Celery("config")
 
 # Load settings with the "CELERY_" prefix
 app.config_from_object("django.conf:settings", namespace="CELERY")

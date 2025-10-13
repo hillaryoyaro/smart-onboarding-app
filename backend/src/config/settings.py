@@ -115,6 +115,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
+# Optional: for retries, monitoring, and visibility
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+
 # ==========================
 # STATIC & MEDIA
 # ==========================
@@ -140,4 +144,16 @@ AUTH_PASSWORD_VALIDATORS = [
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@smartonboarding.com")
 ADMIN_EMAIL = config("ADMIN_EMAIL", default="noreply@smartonboarding.com")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# ==========================
+# INTERNATIONALIZATION
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "hillaryoyaroh@gmail.com"
+EMAIL_HOST_PASSWORD = "mekn xpzo zuhh mdxg"  # NOT your Gmail password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+ADMIN_EMAIL = "hillaryoyaroh@gmail.com"
+
+
 
