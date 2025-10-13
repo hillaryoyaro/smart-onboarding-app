@@ -4,37 +4,37 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import ApiProxy from "@/lib/api";
 
-interface KycValues {
+interface LoanValues {
   full_name: string;
   email: string;
   phone_number: string;
-  date_of_birth: string;
-  gender: string;
-  national_id_number: string;
-  address: string;
-  city: string;
-  country: string;
-  occupation: string;
+  kyc_reference_id: string;
+  loan_amount: string;
+  loan_term: string;
+  loan_purpose: string;
+  employment_status: string;
+  monthly_income: string;
+  collateral_description: string;
 }
 
 type FileMap = {
   [key: string]: FileList;
 };
 
-export default function KycForm({ slug = "kycform" }: { slug?: string }) {
+export default function LoanForm({ slug = "loanform" }: { slug?: string }) {
   const router = useRouter();
 
-  const [values, setValues] = useState<KycValues>({
+  const [values, setValues] = useState<LoanValues>({
     full_name: "",
     email: "",
     phone_number: "",
-    date_of_birth: "",
-    gender: "",
-    national_id_number: "",
-    address: "",
-    city: "",
-    country: "",
-    occupation: "",
+    kyc_reference_id: "",
+    loan_amount: "",
+    loan_term: "",
+    loan_purpose: "",
+    employment_status: "",
+    monthly_income: "",
+    collateral_description: "",
   });
 
   const [files, setFiles] = useState<FileMap>({});
@@ -66,7 +66,7 @@ export default function KycForm({ slug = "kycform" }: { slug?: string }) {
     const { status } = await ApiProxy.post(`/forms/${slug}/submit/`, fd, false, true);
 
     setLoading(false);
-    if (status === 201) router.push("/onboarding/success");
+    if (status === 201) router.push("/onboarding/loan/success");
     else alert("Submission failed");
   }
 
@@ -76,72 +76,52 @@ export default function KycForm({ slug = "kycform" }: { slug?: string }) {
       className="max-w-2xl mx-auto space-y-4 p-6 bg-white shadow rounded-lg"
     >
       <h2 className="text-xl font-semibold mb-2 text-gray-700">
-        Know Your Customer (KYC) Form
+        Loan Application Form
       </h2>
       <p className="text-sm text-gray-500 mb-4">
-        Please complete this form to verify your identity.
+        Please fill out this form to apply for a loan. Ensure all details are correct.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input label="Full Name" name="full_name" value={values.full_name} onChange={onChange} required />
-        <Input label="Email Address" name="email" type="email" value={values.email} onChange={onChange} required />
+        <Input label="Email" name="email" type="email" value={values.email} onChange={onChange} required />
         <Input label="Phone Number" name="phone_number" value={values.phone_number} onChange={onChange} required />
-        <Input label="Date of Birth" name="date_of_birth" type="date" value={values.date_of_birth} onChange={onChange} required />
-
+        <Input label="KYC Reference ID" name="kyc_reference_id" value={values.kyc_reference_id} onChange={onChange} required />
+        <Input label="Loan Amount (Ksh)" name="loan_amount" type="number" value={values.loan_amount} onChange={onChange} required />
         <Select
-          label="Gender"
-          name="gender"
-          value={values.gender}
+          label="Loan Term"
+          name="loan_term"
+          value={values.loan_term}
           onChange={onChange}
-          options={["Male", "Female", "Other"]}
+          options={["3 Months", "6 Months", "12 Months", "24 Months"]}
           required
         />
-
-        <Input
-          label="National ID / Passport Number"
-          name="national_id_number"
-          value={values.national_id_number}
+        <Textarea label="Loan Purpose" name="loan_purpose" value={values.loan_purpose} onChange={onChange} required />
+        <Select
+          label="Employment Status"
+          name="employment_status"
+          value={values.employment_status}
           onChange={onChange}
+          options={["Employed", "Self-Employed", "Unemployed", "Student", "Retired"]}
           required
         />
-
+        <Input label="Monthly Income (Ksh)" name="monthly_income" type="number" value={values.monthly_income} onChange={onChange} required />
         <Textarea
-          label="Residential Address"
-          name="address"
-          value={values.address}
+          label="Collateral Description"
+          name="collateral_description"
+          value={values.collateral_description}
           onChange={onChange}
-          required
+          placeholder="Describe the asset or guarantee offered"
         />
-
-        <Input label="City / Town" name="city" value={values.city} onChange={onChange} required />
-
-        <Select
-          label="Country"
-          name="country"
-          value={values.country}
-          onChange={onChange}
-          options={["Kenya", "Uganda", "Tanzania", "Rwanda", "South Sudan", "Ethiopia", "Other"]}
-          required
-        />
-
-        <Input
-          label="Occupation"
-          name="occupation"
-          value={values.occupation}
-          onChange={onChange}
-          placeholder="e.g. Software Engineer"
-        />
-
-        <FileInput label="Upload ID Document" name="id_document" onChange={onFileChange} required />
-        <FileInput label="Upload Signature" name="signature" onChange={onFileChange} />
+        <FileInput label="Upload Supporting Document" name="supporting_doc" onChange={onFileChange} />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-purple-600 text-white py-2 px-6 rounded hover:bg-purple-700 transition w-full mt-6"
+        className="bg-green-600 text-white py-2 px-6 rounded hover:bg-green-700 transition w-full mt-6"
       >
-        {loading ? "Submitting..." : "Submit"}
+        {loading ? "Submitting..." : "Submit Loan Application"}
       </button>
     </form>
   );

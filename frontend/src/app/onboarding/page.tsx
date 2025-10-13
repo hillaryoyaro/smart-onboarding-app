@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { DJANGO_API_ENDPOINT } from "@/config/defaults";
-import DynamicFormRenderer from "@/components/forms/DynamicFormRenderer";
-import OnboardingForm from "@/components/forms/OnboardingForm";
+
+import KycForm from "@/components/forms/KycForm";
 
 export default function OnboardingPage() {
   const [formConfig, setFormConfig] = useState<any>(null);
@@ -35,7 +35,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="container mx-auto">
-      <OnboardingForm slug={slug} />
+      <KycForm slug={slug} />
     </div>
   );
 }
